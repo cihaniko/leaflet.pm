@@ -1,6 +1,97 @@
 describe('Draw & Edit Poly', () => {
     const mapSelector = '#map';
 
+    it('doesnt finish single point polys', () => {
+        cy.toolbarButton('polygon').click();
+
+        cy.get(mapSelector)
+            .click(90, 250)
+            .click(90, 250);
+
+        cy.toolbarButton('edit').click();
+
+        cy.hasVertexMarkers(0);
+    });
+
+    it('adds new vertex to end of array', () => {
+        // when adding a vertex between the first and last current vertex,
+        // the new coord should be added to the end, not the beginning of the coord array
+        // https://github.com/codeofsumit/leaflet.pm/issues/312
+
+        cy.toolbarButton('polygon')
+            .click()
+            .parent('a')
+            .should('have.class', 'active');
+
+        cy.window().then(({ map, L }) => {
+            cy.get(mapSelector)
+                .click(90, 250)
+                .click(100, 50)
+                .click(150, 50)
+                .click(150, 150)
+                .click(90, 250)
+                .then(() => {
+                    let l;
+                    map.eachLayer((layer) => {
+                        if (layer instanceof L.Polygon) {
+                            layer.pm.enable();
+                            l = layer;
+                        }
+                    });
+                    return l;
+                })
+                .as('poly')
+                .then(poly => poly._latlngs[0][0])
+                .as('firstLatLng');
+        });
+
+        cy.get('@poly').then((poly) => {
+            Cypress.$(poly).on('pm:vertexadded', ({ originalEvent: event }) => {
+                const { layer, indexPath, latlng } = event;
+                const newLatLng = Cypress._.get(layer._latlngs, indexPath);
+                expect(latlng.lat).to.equal(newLatLng.lat);
+                expect(latlng.lng).to.equal(newLatLng.lng);
+            });
+        });
+
+        cy.get('.marker-icon-middle').click({ multiple: true });
+
+        cy.get('@poly').then((poly) => {
+            cy.get('@firstLatLng').then((oldFirst) => {
+                const newFirst = poly._latlngs[0][0];
+                expect(oldFirst.lat).to.equal(newFirst.lat);
+                expect(oldFirst.lng).to.equal(newFirst.lng);
+            });
+        });
+    });
+
+    it('pm:create to be called', () => {
+        cy.window().then(({ map }) => {
+            // test pm:create event
+            Cypress.$(map).on('pm:create', ({ originalEvent: event }) => {
+                const poly = event.layer;
+                poly.pm.enable();
+
+                const markers = poly.pm._markers[0];
+                expect(markers).to.have.length(4);
+            });
+        });
+
+        // activate polygon drawing
+        cy.toolbarButton('polygon')
+            .click()
+            .parent('a')
+            .should('have.class', 'active');
+
+        // draw a polygon - triggers the event pm:create
+        cy.get(mapSelector)
+            .click(90, 250)
+            .click(100, 50)
+            .click(150, 50)
+            .click(150, 150)
+            .click(90, 250);
+    });
+
     it('draws and edits a polygon', () => {
         cy.window().then(({ map }) => {
             cy.hasLayers(map, 1);

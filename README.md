@@ -2,23 +2,16 @@
 
 ![](https://travis-ci.com/codeofsumit/leaflet.pm.svg?branch=develop)
 
-A Leaflet Plugin For Creating And Editing Geometry Layers in Leaflet 1.0.\
-Draw, Edit, Drag, Cut and Snap Features.
-
-In the name "leaflet.pm" the "pm" stands for Polygon Management. At the time,
-this plugin only supported polygons. Now you can edit Markers, Polylines,
+A Leaflet Plugin For Creating And Editing Geometry Layers in Leaflet 1.x.\
+Draw, Edit, Drag, Cut and Snap layers like Markers, Polylines,
 Polygons, Circles, Rectangles, LayerGroups, GeoJSON, MultiPolygons, MultiLineStrings and more are coming.
 
 ## [Demo (click here)](https://leafletpm.now.sh)
 
-![snap at drag](https://github.com/codeofsumit/leaflet.pm-demo/blob/master/static/gifs/github-demo.gif)
+![Demo](https://file-hmgrhlmwxy.now.sh/leafletPM.gif)
 
-### Why _another_ geometry editing plugin?
-
-As leaflet.draw development seemed to came to a halt and I needed support for
-leaflet 1.0 I created this plugin myself due to a lack of alternatives.\
-As we are always using the latest leaflet version in a big production app, I will
-(have to) keep this plugin constantly developed.
+Need advanced features like GeoJSON Export, storing meta data and more?\
+Check out **[Geoman](https://geoman.io)**.
 
 ### Getting Started
 
@@ -117,7 +110,7 @@ map.pm.enableDraw('Poly', { finishOn: 'dblclick' });
 map.pm.disableDraw('Poly');
 ```
 
-All available options are specified in the Drawing Mode Section below
+All available options are specified in the Drawing Mode Section below.
 
 ##### Drawing Mode
 
@@ -129,6 +122,9 @@ var options = {
     // snapping
     snappable: true,
     snapDistance: 20,
+
+    // allow snapping to the middle of segments
+    snapMiddle: false,
 
     // self intersection
     allowSelfIntersection: true,
@@ -147,14 +143,10 @@ var options = {
     // show a marker at the cursor
     cursorMarker: false,
 
-    // finish drawing on double click
-    // DEPRECATED: use finishOn: 'dblclick' instead
-    finishOnDoubleClick: false,
-
     // specify type of layer event to finish the drawn shape
     // example events: 'mouseout', 'dblclick', 'contextmenu'
     // List: http://leafletjs.com/reference-1.2.0.html#interactive-layer-click
-    finishOn: 'contextmenu',
+    finishOn: null,
 
     // custom marker style (only for Marker draw)
     markerStyle: {
@@ -202,6 +194,13 @@ map.on('pm:drawstart', function(e) {
         // the working layer and shape
     });
 
+    // also fired on the markers of the polygon
+    layer.on('pm:snapdrag', function(e) {
+        // e includes marker, snap coordinates
+        // segment, the working layer
+        // and the distance
+    });
+
     // check self intersection
     layer.pm.hasSelfIntersection();
 });
@@ -229,15 +228,16 @@ map.on('pm:create', function(e) {
 
 ##### Creating Holes or Cutting a Polygon
 
-![cut polygon](https://user-images.githubusercontent.com/2399810/29863151-15929280-8d6f-11e7-90e8-1935695175aa.gif)
+![cut polygon](https://file-klmbwnzaor.now.sh/cutting.gif)
+
 Enable drawing for the shape "Cut" to draw a polygon that gets subtracted from
 all underlying polygons. This way you can create holes, cut polygons in half or
 remove parts of it.
 
 Important: the cutted layer will be replaced, not updated. Listen to the
 `pm:cut` event to update your layer references in your code. The `pm:cut` event
-will provide you with the old/removed/cut layer and returns the resulting
-layer(s) that is/are added to the map.
+will provide you with the original layer and returns the resulting
+layer(s) that is/are added to the map as a Polygon or MultiPolygon.
 
 ```js
 // recommended options (used when enabled via toolbar)
@@ -406,8 +406,8 @@ map.pm.setPathOptions({
 ### Feature Request
 
 I'm adopting the Issue Management of lodash which means, feature requests get the "Feature Request" Label and then get closed.
-You can upvote to existing feature requests (or create new ones). Upvotes make me see how much a feature is requested and prioritize their implementation.
-Please see the existing [Feature Requests here](https://github.com/codeofsumit/leaflet.pm/issues?q=is%3Aissue+label%3A%22feature+request%22+is%3Aclosed) and upvote if you want them to be implemented.
+You can upvote existing feature requests (or create new ones). Upvotes make me see how much a feature is requested and prioritize their implementation.
+Please see the existing [Feature Requests here](https://github.com/codeofsumit/leaflet.pm/issues?q=is%3Aissue+is%3Aclosed+label%3A%22feature+request%22+sort%3Areactions-%2B1-desc) and upvote if you want them to be implemented.
 
 ### Credit
 
