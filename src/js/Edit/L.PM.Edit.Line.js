@@ -82,7 +82,10 @@ Edit.Line = Edit.extend({
             return false;
         }
         poly.pm._enabled = false;
-        poly.pm._markerGroup.clearLayers();
+
+        if (poly.pm._markerGroup) {
+            poly.pm._markerGroup.clearLayers();
+        }
 
         // clean up draggable
         poly.off('mousedown');
@@ -100,9 +103,9 @@ Edit.Line = Edit.extend({
         L.DomUtil.removeClass(el, 'leaflet-pm-draggable');
 
         // remove invalid class if layer has self intersection
-        if (this.hasSelfIntersection()) {
-            L.DomUtil.removeClass(el, 'leaflet-pm-invalid');
-        }
+        // if (this.hasSelfIntersection()) {
+        //     L.DomUtil.removeClass(el, 'leaflet-pm-invalid');
+        // }
 
         if (this._layerEdited) {
             this._layer.fire('pm:update', {});
@@ -164,6 +167,26 @@ Edit.Line = Edit.extend({
         const map = this._map;
         const coords = this._layer.getLatLngs();
 
+        if (map.getZoom() < 15) {
+            return;
+        }
+
+        var mBounds = map.getBounds();
+        if (!mBounds.intersects(coords)) {
+            this._layer.pm.disable();
+            return;
+        }
+        // for (let i = 0; i < coords.length; i++) {
+
+        //     if (!mBounds.intersects(coords)) {
+        //         //this._enabled = false;
+        //         this._layer.pm.disable();
+        //         return;
+        //     }
+
+        // }
+
+
         // cleanup old ones first
         if (this._markerGroup) {
             this._markerGroup.clearLayers();
@@ -209,19 +232,19 @@ Edit.Line = Edit.extend({
             draggable: !this.options.preventVertexEdit,
             icon: L.divIcon({ className: 'marker-icon' }),
         });
+        if (map.getBounds().contains(latlng)) {
+            marker._pmTempLayer = true;
 
-        marker._pmTempLayer = true;
+            marker.on('dragstart', this._onMarkerDragStart, this);
+            marker.on('move', this._onMarkerDrag, this);
+            marker.on('dragend', this._onMarkerDragEnd, this);
 
-        marker.on('dragstart', this._onMarkerDragStart, this);
-        marker.on('move', this._onMarkerDrag, this);
-        marker.on('dragend', this._onMarkerDragEnd, this);
+            if (!this.options.preventMarkerRemoval) {
+                marker.on('contextmenu', this._removeMarker, this);
+            }
 
-        if (!this.options.preventMarkerRemoval) {
-            marker.on('contextmenu', this._removeMarker, this);
+            this._markerGroup.addLayer(marker);
         }
-
-        this._markerGroup.addLayer(marker);
-
         return marker;
     },
 
@@ -564,7 +587,6 @@ Edit.Line = Edit.extend({
         this._layerEdited = true;
         this._layer.fire('pm:edit');
     },
-<<<<<<< HEAD
 
     _calcMiddleLatLng(latlng1, latlng2) {
         // calculate the middle coordinates between two markers
@@ -594,6 +616,5 @@ Edit.Line = Edit.extend({
 
         return wasRemoved;
     },
-=======
->>>>>>> develop
+
 });

@@ -146,7 +146,14 @@ const Map = L.Class.extend({
             this.disableGlobalEditMode();
         } else {
             // enable
-            this.enableGlobalEditMode(options);
+            if (map.getZoom() >= 15) {
+                this.enableGlobalEditMode(options);
+            }
+            else{
+                //alertify.error('Bu zoom seviyesinde editleme işlemi yapılamaz');
+            this.disableGlobalEditMode();
+
+            }
         }
     },
 });
