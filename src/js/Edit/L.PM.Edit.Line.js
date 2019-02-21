@@ -535,9 +535,9 @@ Edit.Line = Edit.extend({
 
     // update middle markers on the left and right
     // be aware that "next" and "prev" might be interchanged, depending on the geojson array
-    if (marker=!null){
+    //if (marker=!null){
       const markerLatLng = marker.getLatLng();
-    }
+    //}
       
 
     // get latlng of prev and next marker
