@@ -51,8 +51,8 @@ const Map = L.Class.extend({
     const layer = e.target;
     // only remove layer, if it's handled by leaflet.pm,
     // not a tempLayer and not currently being dragged
-    const removeable =
-      !layer._pmTempLayer && (!layer.pm || !layer.pm.dragging());
+    const removeable = 
+    !layer._pmTempLayer && (!layer.pm || !layer.pm.dragging());
 
     if (removeable) {
       layer.remove();
@@ -222,7 +222,7 @@ const Map = L.Class.extend({
         this.disableGlobalEditMode();
     } else {
         // enable
-        if (map.getZoom() >= 15) {
+        if (this.map.getZoom() >= 15) {
             this.enableGlobalEditMode(options);
         }
         else{

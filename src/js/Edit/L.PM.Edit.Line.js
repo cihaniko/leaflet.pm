@@ -87,7 +87,9 @@ Edit.Line = Edit.extend({
       return false;
     }
     poly.pm._enabled = false;
-    poly.pm._markerGroup.clearLayers();
+    if (poly.pm._markerGroup) {
+      poly.pm._markerGroup.clearLayers();
+    }
 
     // clean up draggable
     poly.off('mousedown');
@@ -176,12 +178,12 @@ Edit.Line = Edit.extend({
   _initMarkers() {
     const map = this._map;
     const coords = this._layer.getLatLngs();
-    
-    if (map.getZoom() < 15) {
+
+    if (this._map.getZoom() < 15) {
       return;
     }
 
-    var mBounds = map.getBounds();
+    var mBounds = this._map.getBounds();
     if (!mBounds.intersects(coords)) {
       this._layer.pm.disable();
       return;
@@ -232,7 +234,7 @@ Edit.Line = Edit.extend({
       draggable: true,
       icon: L.divIcon({ className: 'marker-icon' }),
     });
-    if (map.getBounds().contains(latlng)) {
+    if (this._map.getBounds().contains(latlng)) {
       marker._pmTempLayer = true;
 
       marker.on('dragstart', this._onMarkerDragStart, this);
@@ -240,12 +242,12 @@ Edit.Line = Edit.extend({
       marker.on('dragend', this._onMarkerDragEnd, this);
 
       if (!this.options.preventMarkerRemoval) {
-          marker.on('contextmenu', this._removeMarker, this);
+        marker.on('contextmenu', this._removeMarker, this);
       }
 
       this._markerGroup.addLayer(marker);
-  }
-  return marker;
+    }
+    return marker;
   },
 
   // creates the middle markes between coordinates
@@ -539,7 +541,10 @@ Edit.Line = Edit.extend({
 
     // update middle markers on the left and right
     // be aware that "next" and "prev" might be interchanged, depending on the geojson array
-    const markerLatLng = marker.getLatLng();
+    if (marker=!null){
+      const markerLatLng = marker.getLatLng();
+    }
+      
 
     // get latlng of prev and next marker
     const prevMarkerLatLng = markerArr[prevMarkerIndex].getLatLng();
